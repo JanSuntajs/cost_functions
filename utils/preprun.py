@@ -16,7 +16,12 @@ def main(data_path, savepath, xcrit, xcol, ycol,
          popsize0, maxiter0, workers, sizelist,
          critical_point_model, rescaling_function,
          critical_operation, bounds, nsamples,
-         savename_prefix, queue=False):
+         savename_prefix, queue=False,
+         time='00:00:00',
+         ntasks=1,
+         cputasks=1,
+         memcpu=0,
+         ):
     """
     A function for preparing the temporary file and
     running the main script, either sequentially or
