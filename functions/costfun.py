@@ -7,8 +7,8 @@ for calculation of the cost function.
 import numpy as np
 from inspect import signature, getmembers, isfunction
 
-import crit_functions
-import rescale_functions
+from . import crit_functions
+from . import rescale_functions
 
 # --------------------------
 # CRITICAL PARAMETER SCALING
@@ -21,7 +21,6 @@ _crit_functions_list = [fun for fun in getmembers(crit_functions)
 _crit_functions_dict = {key.split('_x_crit_')[1]: value for
                         (key, value) in _crit_functions_list}
 _crit_keys = _crit_functions_dict.keys()
-
 
 # -------------------
 # RESCALING FUNCTIONS
@@ -165,6 +164,8 @@ def rescale_xvals(x, sizelist, x_crit_fun, rescale_fun,
         x_ = x - x_crit[:, np.newaxis]
     elif rescale_type == 'div':
         x_ = x / x_crit[:, np.newaxis]
+    else:
+        raise ValueError('rescale_x info: rescale_type not given!')
 
     rescale_x = rescale_fun(x_, sizelist, *params_rescale)
 

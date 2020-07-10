@@ -9,12 +9,12 @@ import numpy as np
 from glob import glob
 from scipy.optimize import minimize, differential_evolution
 import sys
-from costfun import *
+from functions.costfun import *
 
 
 if __name__ == '__main__':
 
-    # get command-line args -> data path and seed
+    # get command-line args -> data popsize0ath and seed
     tmp_path = sys.argv[1]
     seed = int(sys.argv[2])
 
@@ -37,9 +37,10 @@ if __name__ == '__main__':
     popsize0 = int(initdict['popsize0'])
     maxiter0 = int(initdict['maxiter0'])
     bounds = initdict['bounds']
-    
+
     critical_point = str(initdict['critical_point_model'])
     rescaling_function = str(initdict['rescaling_function'])
+    crit_operation = str(initdict['critical_operation'])
     # optimization
 
     optRes = differential_evolution(minimization_fun,
@@ -47,6 +48,7 @@ if __name__ == '__main__':
                                     args=(x, y, sizelist,
                                           critical_point,
                                           rescaling_function,
+                                          crit_operation,
                                           False),
                                     popsize=popsize0,
                                     maxiter=maxiter0,
@@ -64,6 +66,7 @@ if __name__ == '__main__':
             'nit': optRes.nit,
             'critical_point': critical_point,
             'rescaling_function': rescaling_function,
+            'critical_point_operation': crit_operation,
             'popsize0': popsize0,
             'maxiter0': maxiter0,
             'bounds': bounds,

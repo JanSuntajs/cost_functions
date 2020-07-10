@@ -76,7 +76,7 @@ def _rescale_pl(x, sizelist, nu):
     return rescale_x
 
 
-def rescale_id(x, sizelist, *params):
+def _rescale_id(x, sizelist, *params):
     """
     Identity function for rescaling which
     simply leaves the incoming x-data
