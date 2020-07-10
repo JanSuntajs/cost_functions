@@ -5,7 +5,7 @@
 #SBATCH --mem-per-cpu={3}
 #SBATCH --job-name={4}
 #SBATCH --output={5}/slurm_%A_%a.out
-#SBACTH --array=1-{6}:1
+#SBATCH --array=1-{6}:1
 
 export OMP_NUM_THREADS =${{SLURM_CPUS_PER_TASK}}
 
