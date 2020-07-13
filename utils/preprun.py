@@ -151,7 +151,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
         'savename_prefix': savename_prefix
     }
 
-    tmpfilename = (f'/tmp/tmpfile_{critical_point_model}_'
+    tmpfilename = (f'./tmp/tmpfile_{critical_point_model}_'
                    f'{rescaling_function}.npz')
     np.savez(tmpfilename, **tmpdict)
     np.savez(f'{savepath}/orig_data.npz', **{'x': x, 'y': y,
@@ -175,7 +175,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
         slurmscript = slurmscript.format(time, ntasks, cputasks,
                                          memcpu, savename_prefix, 'slurmlog',
                                          nsamples,
-                                         f'.{tmpfilename}')
+                                         tmpfilename)
 
         slurmname = (f'slurm_{savename_prefix}_'
                      f'{critical_point_model}_{rescaling_function}')
