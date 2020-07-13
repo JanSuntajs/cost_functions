@@ -114,6 +114,10 @@ def main(data_path, savepath, xcrit, xcol, ycol,
     if not os.path.isdir('slurmlog'):
         os.makedirs('slurmlog')
 
+    # dependency script folder
+    if not os.path.isdir('slurmlog_dep'):
+        os.makedirs('slurmlog_dep')
+
     if not os.path.isdir('tmp'):
         os.makedirs('tmp')
 
