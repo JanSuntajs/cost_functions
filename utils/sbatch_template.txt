@@ -7,9 +7,6 @@
 #SBATCH --output={5}/slurm_%A_%a.out
 #SBATCH --array=1-{6}:1
 
-export OMP_NUM_THREADS =${{SLURM_CPUS_PER_TASK}}
+export OMP_NUM_THREADS=${{SLURM_CPUS_PER_TASK}}
 
 srun python main_costfun.py {7} ${{SLURM_ARRAY_TASK_ID}}
-
-wait 
-rm {7}

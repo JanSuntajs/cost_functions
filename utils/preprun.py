@@ -175,7 +175,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
         slurmscript = slurmscript.format(time, ntasks, cputasks,
                                          memcpu, savename_prefix, 'slurmlog',
                                          nsamples,
-                                         tmpfilename)
+                                         f'.{tmpfilename}')
 
         slurmname = (f'slurm_{savename_prefix}_'
                      f'{critical_point_model}_{rescaling_function}')
