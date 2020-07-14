@@ -41,6 +41,7 @@ if __name__ == '__main__':
     critical_point = str(initdict['critical_point_model'])
     rescaling_function = str(initdict['rescaling_function'])
     crit_operation = str(initdict['critical_operation'])
+    x_prep_operation = str(initdict['x_operation'])
     # optimization
 
     optRes = differential_evolution(minimization_fun,
@@ -71,12 +72,12 @@ if __name__ == '__main__':
             'maxiter0': maxiter0,
             'bounds': bounds,
             'xcrit': xcrit_vals,
-            'x_preprocessing_operation': initdict['x_operation']
+            'x_preprocessing_operation': x_prep_operation,
         }
         print('Saving results to disk!')
         np.savez((f'{savepath}/{savename_prefix}_'
                   f'rescale_{critical_point}'
                   f'_{crit_operation}'
                   f'_{rescaling_function}'
-                  f'_preprocess_{initdict['x_operation']}'
+                  f'_preprocess_{x_prep_operation}'
                   f'{seed}.npz'), **savefile)
