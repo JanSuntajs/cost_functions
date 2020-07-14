@@ -32,17 +32,24 @@ def _x_val_preprocess(xvals, preprocess_type='none'):
         'inv' -> inverse, hence x -> 1./x
 
     """
+    def _id(x):
+        return x
+
+    def _inv(x):
+        return 1. / x
 
     if preprocess_type == 'none':
-        return xvals
+        fun = _id
     elif preprocess_type == 'log':
-        return np.log(xvals)
+        fun = np.log
     elif preprocess_type == 'log10':
-        return np.log10(xvals)
+        fun = np.log10
     elif preprocess_type == 'inv':
-        return 1. / x
+        fun = _inv
     else:
         raise ValueError(f'{preprocess_type} not yet implemented!')
+
+    return np.array([fun(xval) for xval in xvals])
 
 
 def main(data_path, savepath, xcrit, xcol, ycol,
