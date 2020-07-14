@@ -12,6 +12,39 @@ import os
 from glob import glob
 
 
+def _x_val_preprocess(xvals, preprocess_type='none'):
+    """
+    Returns processed x values in case preprocessing is
+    chosen before the scaling analysis.
+    Parameters:
+    -----------
+
+    xvals: ndarray
+        Data to be processed.
+
+
+    preprocess_type: string, optional
+        Which operation to perform on the data.
+        Options are:
+        'none' -> no rescaling
+        'log' -> natural logarithm
+        'log10' -> base 10 logarithm
+        'inv' -> inverse, hence x -> 1./x
+
+    """
+
+    if preprocess_type == 'none':
+        return xvals
+    elif preprocess_type == 'log':
+        return np.log(xvals)
+    elif preprocess_type == 'log10':
+        return np.log10(xvals)
+    elif preprocess_type == 'inv':
+        return 1. / x
+    else:
+        raise ValueError(f'{preprocess_type} not yet implemented!')
+
+
 def main(data_path, savepath, xcrit, xcol, ycol,
          popsize0, maxiter0, workers, sizelist,
          critical_point_model, rescaling_function,
@@ -21,6 +54,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
          ntasks=1,
          cputasks=1,
          memcpu=0,
+         preprocess_xvals='none',
          ):
     """
     A function for preparing the temporary file and
@@ -104,6 +138,11 @@ def main(data_path, savepath, xcrit, xcol, ycol,
     queue: boolean, optional
            Whether to perform a job in parallel (if True) on a SLURM-based
            cluster or not. Defaults to False.
+
+    preprocess_xvals: string, optional
+           Whether to perform some operation on the xvalues before the scaling
+           analysis is performed, such as taking the logarithm of it. Curently
+           'none', 'log', 'log10' and 'inv' options are possible.
     """
     # create the results folder if it does
     # not exist already
@@ -133,10 +172,15 @@ def main(data_path, savepath, xcrit, xcol, ycol,
     y = np.array([y_[(x[i] > xcrit[0]) & (x[i] < xcrit[1])] for i, y_
                   in enumerate(y)])
     x = np.array([x_[(x_ > xcrit[0]) & (x_ < xcrit[1])] for x_ in x])
+
+    # preprocess data
+    x_prep = _x_val_preprocess(x, preprocess_xvals)
+
     # save a temporary file in npz format
     tmpdict = {
         'data_path': data_path,
         'x': x,
+        'x_prep': x_prep,
         'y': y,
         'xcrit': xcrit,
         'popsize0': popsize0,
@@ -148,7 +192,8 @@ def main(data_path, savepath, xcrit, xcol, ycol,
         'critical_operation': critical_operation,
         'bounds': bounds,
         'save_path': savepath,
-        'savename_prefix': savename_prefix
+        'savename_prefix': savename_prefix,
+        'preprocess_xvals': preprocess_xvals,
     }
 
     tmpfilename = (f'./tmp/tmpfile_{critical_point_model}_'
@@ -157,6 +202,11 @@ def main(data_path, savepath, xcrit, xcol, ycol,
     np.savez(f'{savepath}/orig_data.npz', **{'x': x, 'y': y,
                                              'sizes': sizelist,
                                              'desc': savename_prefix})
+    np.savez(f'{savepath}/processed_data_{preprocess_xvals}.npz',
+             **{'x': x_prep, 'y': y,
+                'x_operation': preprocess_xvals,
+                'sizes': sizelist,
+                'desc': savename_prefix})
 
     if not queue:
 

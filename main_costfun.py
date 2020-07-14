@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     xcrit_vals = initdict['xcrit']
 
-    x = initdict['x']
+    x = initdict['x_prep']
     y = initdict['y']
 
     x, y = pad_vals(x, y)
@@ -71,8 +71,12 @@ if __name__ == '__main__':
             'maxiter0': maxiter0,
             'bounds': bounds,
             'xcrit': xcrit_vals,
+            'x_preprocessing_operation': initdict['x_operation']
         }
         print('Saving results to disk!')
         np.savez((f'{savepath}/{savename_prefix}_'
                   f'rescale_{critical_point}'
-                  f'_{rescaling_function}_{seed}.npz'), **savefile)
+                  f'_{crit_operation}'
+                  f'_{rescaling_function}'
+                  f'_preprocess_{initdict['x_operation']}'
+                  f'{seed}.npz'), **savefile)
