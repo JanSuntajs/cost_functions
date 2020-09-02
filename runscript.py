@@ -26,18 +26,22 @@ ycol = 1
 xcrit = (10**-5, 2.)
 
 
-critical_operation = 'div'
+critical_operation = 'sub'
 # scaling of the critical point
 critical_point_model = 'free'
 
 # rescaling_function
-rescaling_function = 'id'
+rescaling_function = 'pl'
+# preprocess x vals
+x_val_prep = 'log10'
+
 
 # where the data are stored
 data_path = '/home/jan/costfun_single_rivr_fig3/*'
 # where to store the results
 savepath = (f'results/heis_sing_fig3_costfun/crit_point_scaling_'
-            f'{critical_point_model}/rescale_{rescaling_function}/')
+            f'{critical_point_model}/rescale_{rescaling_function}/'
+            f'prep_xval_{x_val_prep}_{critical_operation}/')
 
 savename_prefix = 'r_collapse'
 # number of parallel runs
@@ -45,7 +49,7 @@ nsamples = 30
 
 # bounds for parameters to be determined
 
-bounds = [(0., 5.) for i in range(len(sizelist))]
+bounds = [(0., 5.) for i in range(len(sizelist)+1)]
 
 # SLURM PARAMS
 time = '00:59:59'
@@ -62,4 +66,4 @@ if __name__ == '__main__':
     main(data_path, savepath, xcrit, xcol, ycol,
          popsize0, maxiter0, workers, sizelist, critical_point_model,
          rescaling_function, critical_operation, bounds, nsamples,
-         savename_prefix, queue, time, ntasks, cputasks, memcpu)
+         savename_prefix, queue, time, ntasks, cputasks, memcpu, x_val_prep)
