@@ -83,6 +83,33 @@ def _x_crit_poly(sizelist, *params):
     return np.array(params)
 
 
+def _x_crit_const(sizelist, x0):
+    """
+    A model which predicts the critical
+    value of the driving parameter
+    is just a constant.
+
+    Parameters:
+    -----------
+
+    sizelist: 1D array or 1D array-like
+    Array of system sizes involved in
+    the scaling analysis.
+
+    x0: float
+    The critical value prediction.
+
+    Returns:
+    --------
+
+    1D ndarray:
+    An array of critical parameter values
+    for each involved system size.
+    """
+
+    return x0 * np.ones_like(sizelist)
+
+
 def _x_crit_lin(sizelist, x0, x1):
     """
     A model for linear scaling of
@@ -152,6 +179,41 @@ def _x_crit_inv(sizelist, x0, x1):
     return x0 + x1 / np.array(sizelist)
 
 
+def _x_crit_inv_sq(sizelist, x0, x1):
+    """
+    A model for inverse squared scaling of
+    the critical disorder strength
+    with system size according to the
+    equation:
+
+    x_crit = x0 + x1 / size**2
+
+    Parameters:
+    -----------
+
+    sizelist: 1D array or 1D array-like
+    Array of system sizes involved in
+    the scaling analysis.
+
+    x0: float
+    The subleading term in the inverse
+    dependence.
+
+    x1: float
+    The leading term in the inverse dependence.
+
+    Returns:
+    --------
+
+    1D ndarray:
+    An array of critical parameter values
+    for each involved system size.
+    """
+
+    x0, x1 = list(map(np.float64, [x0, x1]))
+    return x0 + x1 / np.array(sizelist)**2
+
+
 def _x_crit_inv_log(sizelist, x0, x1):
     """
     A model for inverse log scaling of
@@ -184,5 +246,3 @@ def _x_crit_inv_log(sizelist, x0, x1):
     """
     x0, x1 = list(map(np.float64, [x0, x1]))
     return x0 + x1 / np.log(sizelist)
-
-

@@ -41,7 +41,7 @@ if __name__ == '__main__':
     critical_point = str(initdict['critical_point_model'])
     rescaling_function = str(initdict['rescaling_function'])
     crit_operation = str(initdict['critical_operation'])
-    x_prep_operation = str(initdict['x_operation'])
+    x_prep_operation = str(initdict['preprocess_xvals'])
     # optimization
 
     optRes = differential_evolution(minimization_fun,
@@ -80,4 +80,4 @@ if __name__ == '__main__':
                   f'_{crit_operation}'
                   f'_{rescaling_function}'
                   f'_preprocess_{x_prep_operation}'
-                  f'{seed}.npz'), **savefile)
+                  f'_{seed}.npz'), **savefile)
