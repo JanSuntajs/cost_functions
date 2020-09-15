@@ -71,6 +71,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
          cputasks=1,
          memcpu=0,
          preprocess_xvals='none',
+         preprocess_xvals_prefactor=1.,
          ):
     """
     A function for preparing the temporary file and
@@ -159,6 +160,9 @@ def main(data_path, savepath, xcrit, xcol, ycol,
            Whether to perform some operation on the xvalues before the scaling
            analysis is performed, such as taking the logarithm of it. Curently
            'none', 'log', 'log10' and 'inv' options are possible.
+    preprocess_xvals_prefactor: float, optional
+        Multiplicative prefactor for the x-data values
+        before any transformation is performed.
     """
     # create the results folder if it does
     # not exist already
@@ -190,7 +194,8 @@ def main(data_path, savepath, xcrit, xcol, ycol,
     x = np.array([x_[(x_ > xcrit[0]) & (x_ < xcrit[1])] for x_ in x])
 
     # preprocess data
-    x_prep = _x_val_preprocess(x, preprocess_xvals)
+    x_prep = _x_val_preprocess(x, preprocess_xvals,
+                               preprocess_xvals_prefactor)
 
     # save a temporary file in npz format
     tmpdict = {
@@ -210,6 +215,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
         'save_path': savepath,
         'savename_prefix': savename_prefix,
         'preprocess_xvals': preprocess_xvals,
+        'preprocess_xvals_prefactor': preprocess_xvals_prefactor,
     }
 
     tmpfilename = (f'./tmp/tmpfile_{critical_point_model}_'
