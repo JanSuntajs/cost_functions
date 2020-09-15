@@ -12,7 +12,7 @@ import os
 from glob import glob
 
 
-def _x_val_preprocess(xvals, preprocess_type='none'):
+def _x_val_preprocess(xvals, preprocess_type='none', prefactor=1.):
     """
     Returns processed x values in case preprocessing is
     chosen before the scaling analysis.
@@ -30,6 +30,10 @@ def _x_val_preprocess(xvals, preprocess_type='none'):
         'log' -> natural logarithm
         'log10' -> base 10 logarithm
         'inv' -> inverse, hence x -> 1./x
+        'mult' -> multipy x-axis value by a prefactor
+    prefactor: float, optional
+        Multiplicative prefactor for the x-data values
+        before any transformation is performed.
 
     """
     def _id(x):
@@ -37,6 +41,9 @@ def _x_val_preprocess(xvals, preprocess_type='none'):
 
     def _inv(x):
         return 1. / x
+
+    def _mult(x):
+        return prefactor * x
 
     if preprocess_type == 'none':
         fun = _id
@@ -46,6 +53,8 @@ def _x_val_preprocess(xvals, preprocess_type='none'):
         fun = np.log10
     elif preprocess_type == 'inv':
         fun = _inv
+    elif preprocess_type == 'mult':
+        fun = _mult
     else:
         raise ValueError(f'{preprocess_type} not yet implemented!')
 
