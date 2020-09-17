@@ -144,6 +144,40 @@ def _x_crit_lin(sizelist, x0, x1):
     return x0 + np.array(sizelist) * x1
 
 
+def _x_crit_sqrt(sizelist, x0, x1):
+    """
+    A model for square root scaling of
+    the critical disorder strength
+    with system size according to the
+    equation:
+
+    x_crit = x0 + x1 * sqrt(size)
+
+    Parameters:
+    -----------
+
+    sizelist: 1D array or 1D array-like
+    Array of system sizes involved in
+    the scaling analysis.
+
+    x0: float
+    The subleading term in the square root
+    dependence.
+
+    x1: float
+    The leading term in the square root dependence.
+
+    Returns:
+    --------
+
+    1D ndarray:
+    An array of critical parameter values
+    for each involved system size.
+    """
+
+    return x0 + np.sqrt(np.array(sizelist)) * x1
+
+
 def _x_crit_inv(sizelist, x0, x1):
     """
     A model for inverse scaling of
@@ -177,6 +211,41 @@ def _x_crit_inv(sizelist, x0, x1):
 
     x0, x1 = list(map(np.float64, [x0, x1]))
     return x0 + x1 / np.array(sizelist)
+
+
+def _x_crit_inv_sqrt(sizelist, x0, x1):
+    """
+    A model for inverse square root scaling of
+    the critical disorder strength
+    with system size according to the
+    equation:
+
+    x_crit = x0 + x1 / sqrt(size)
+
+    Parameters:
+    -----------
+
+    sizelist: 1D array or 1D array-like
+    Array of system sizes involved in
+    the scaling analysis.
+
+    x0: float
+    The subleading term in the inverse
+    dependence.
+
+    x1: float
+    The leading term in the inverse square root dependence.
+
+    Returns:
+    --------
+
+    1D ndarray:
+    An array of critical parameter values
+    for each involved system size.
+    """
+
+    x0, x1 = list(map(np.float64, [x0, x1]))
+    return x0 + x1 / np.sqrt(np.array(sizelist))
 
 
 def _x_crit_inv_sq(sizelist, x0, x1):
