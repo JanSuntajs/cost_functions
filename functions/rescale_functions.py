@@ -32,6 +32,28 @@ import numpy as np
 
 
 # rescaling functions
+def _rescale_alt(x, sizelist, a, nu):
+    """
+    Rescaling according to the
+    B. Altshuler's proposal, where an ansatz
+    similar to the BKT scaling form is used
+    but with an additional free parameter.
+
+    Rescaling function:
+
+    x_alt = sgn(x) * size / exp(a / abs(x) ** nu)
+
+    NOTE: values of x entering the above equation have
+    already been modified by subtracting the value of
+    the critical parameter x_c from them
+    """
+
+    sizelist = np.array(sizelist)
+    rescale_x = np.sign(
+        x) * sizelist[:, np.newaxis] / np.exp(a / np.abs(x) ** nu)
+
+    return rescale_x
+
 
 def _rescale_kt(x, sizelist, a):
     """
