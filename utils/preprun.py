@@ -194,8 +194,11 @@ def main(data_path, savepath, xcrit, xcol, ycol,
     x = np.array([x_[(x_ > xcrit[0]) & (x_ < xcrit[1])] for x_ in x])
 
     # preprocess data
-    x_prep = _x_val_preprocess(x, preprocess_xvals,
-                               preprocess_xvals_prefactor)
+    # 2 steps -> first, perform multiplication, then do the
+    # required transformation
+    x_prep = _x_val_preprocess(x, 'mult', preprocess_xvals_prefactor)
+    x_prep = _x_val_preprocess(x_prep, preprocess_xvals,
+                               1.0)
 
     # save a temporary file in npz format
     tmpdict = {
