@@ -12,6 +12,70 @@ import os
 from glob import glob
 
 
+def _sort_sizes(data_path, splitkey1, splitkey2,
+                type_=int):
+    """
+    Function for sorting the data according to their
+    size. If string sorting is used to sort the data
+    corresponding to, say, different system sizes, system
+    sizes of different orders of magnitude could be ordered
+    inappropriately. For instance, a sequence of:
+    ['substring_32', 'substring_128', 'substring_512'] would be sorted as
+    ['substring_128', 'substring_32', 'substring_512'] whereas our
+    algorithms would require ordering in terms of increasing numerical
+    values. To that end, we provide a function that allows for the extraction
+    of the system size parameter and the function can then be provided
+    as an argument to the sorting function.
+
+    Parameters
+    ----------
+
+    data_path: string
+               String in a form of a regex specifiying what type (and location)
+               of the files to look for.
+    splitkey1, splitkey2: string
+               substrings enclosing the numerical value to be extracted.
+               Example:
+               L_40_dim_2
+               In case we wish to extract the value next to 'L_' substring,
+               we provide:
+               splitkey1 = 'L_'
+               'splitkey2' = '_dim_'
+               Note: in case we wished to extract the parameter next
+               to '_dim_', we would have used:
+               splitkey1 = '_dim_'
+               splitkey2 = ' '
+    type_: function, optional
+           Datatype of the parameter that is sought after. Defaults to
+           int for system sizes.
+
+    Returns:
+
+    files: list
+           An ordered list of files storing the data. The files are
+           ordered w.r.t. the specified parameter.
+
+    sizelist: list
+            An ordered list of system sizes
+
+
+    """
+    def _get_size(filename):
+        """
+        Obtain the string describing the system size.
+        """
+        tail = os.path.split(filename)[1]
+
+        size = type_(tail.split(splitkey1)[1].split(splitkey2)[0])
+        return size
+
+    files = glob(data_path)
+    files = sorted(files, key=_get_size)
+    sizelist = [_get_size(file) for file in files]
+
+    return files, sizelist
+
+
 def _x_val_preprocess(xvals, preprocess_type='none', prefactor=1.):
     """
     Returns processed x values in case preprocessing is
@@ -62,7 +126,8 @@ def _x_val_preprocess(xvals, preprocess_type='none', prefactor=1.):
 
 
 def main(data_path, savepath, xcrit, xcol, ycol,
-         popsize0, maxiter0, workers, sizelist,
+         popsize0, maxiter0, workers, sizeloc1,
+         sizeloc2, sizedtype,
          critical_point_model, rescaling_function,
          critical_operation, bounds, nsamples,
          savename_prefix, queue=False,
@@ -110,8 +175,23 @@ def main(data_path, savepath, xcrit, xcol, ycol,
                                  for parallelization in which case the
                                  'workers' parameter specifies the number
                                  of parallel threads used.
-    sizelist: 1D array or array-like
-              An array with system sizes used in the analysis.
+
+    sizeloc1, sizeloc2: string
+                        substrings needed to locate the string describing
+                        the system size in the filename of the data file.
+                        This is needed for proper sorting of data.
+                        Example:
+
+                        If the filenames are of the form:
+                        '*L_40_dim_2_*' and we wish to extract the parameter
+                        next to 'L_', we set the following values for the
+                        sizeloc1 and sizeloc2 parameters:
+                        sizeloc1 = 'L_'
+                        sizeloc2 = '_dim_'
+
+    sizedtype: function
+               Function/datatype of the size parameter. Most often int is used.
+
 
     critical_point_model: string
                           What kind of model do we predict for the scaling
@@ -182,7 +262,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
 
     # prepare data to be analyzed
 
-    files = np.sort(glob(data_path))
+    files, sizelist = _sort_sizes(data_path, sizeloc1, sizeloc2, sizedtype)
     vals = np.array([np.loadtxt(file) for file in files])
 
     x = np.array([val[:, int(xcol)] for val in vals])

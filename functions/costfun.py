@@ -151,6 +151,10 @@ def rescale_xvals(x, sizelist, x_crit_fun, rescale_fun,
     # number of model's free parameters
     sig = signature(rescale_fun)
 
+    # two mandatory arguments for the rescale
+    # function are the x-values and the list of
+    # system sizes; all other arguments are relevant
+    # for the critical point scaling
     npar = len(sig.parameters) - 2
     npar_ = len(args) - npar
     params_crit = args[:npar_]
