@@ -12,8 +12,8 @@ import os
 from glob import glob
 
 
-def _sort_sizes(data_path, splitkey1, splitkey2,
-                type_=int):
+def sort_sizes(data_path, splitkey1, splitkey2,
+               type_=int):
     """
     Function for sorting the data according to their
     size. If string sorting is used to sort the data
@@ -262,7 +262,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
 
     # prepare data to be analyzed
 
-    files, sizelist = _sort_sizes(data_path, sizeloc1, sizeloc2, sizedtype)
+    files, sizelist = sort_sizes(data_path, sizeloc1, sizeloc2, sizedtype)
     vals = np.array([np.loadtxt(file) for file in files])
 
     x = np.array([val[:, int(xcol)] for val in vals])
