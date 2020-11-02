@@ -1,0 +1,5 @@
+#!/bin/bash
+#SBATCH --time=00:01:00
+
+jid0 = $(sbatch --parsable {0})
+jid1 = $(sbatch --parsable --dependency=afterany:$jid0 {1})

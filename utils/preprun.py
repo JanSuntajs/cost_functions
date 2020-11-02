@@ -12,6 +12,9 @@ import os
 from glob import glob
 
 
+_special_keys = ['params', 'costfun_value', 'nfev', 'nit', 'bounds']
+
+
 def sort_sizes(data_path, splitkey1, splitkey2,
                type_=int):
     """
@@ -73,7 +76,38 @@ def sort_sizes(data_path, splitkey1, splitkey2,
     files = sorted(files, key=_get_size)
     sizelist = [_get_size(file) for file in files]
 
-    return files, sizelist
+    return np.array(files), np.array(sizelist)
+
+
+def window_stack(sizelist, stepsize=1, width=3):
+    """
+    This function stacks different parts of a sorted array
+    together. The number of stacked values is determined
+    by the width parameter and the step in which stacking
+    is performed is determined by the stepsize parameter.
+
+    Example:
+
+    sizelist = [7, 8, 9, 10, 11, 12, 13]
+    Choosing stepsize = 2
+    and width = 3, would return the following
+    stacking:
+
+    [7, 8, 9], [9, 10, 11], [11,  12, 13]
+    """
+    sizelist = np.array(sizelist)
+    n = sizelist.shape[0]
+    if width < n:
+        top = n - width + 1
+    else:
+        top = n
+
+    stacks = [sizelist[i:i + width]
+              for i in range(0, top, stepsize)]
+
+    stacks = [stack for stack in stacks if stack.size >= 2]
+
+    return np.array(stacks, dtype=np.int)
 
 
 def _x_val_preprocess(xvals, preprocess_type='none', prefactor=1.):
@@ -125,6 +159,115 @@ def _x_val_preprocess(xvals, preprocess_type='none', prefactor=1.):
     return np.array([fun(xval) for xval in xvals])
 
 
+def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
+                   popsize0, maxiter0, workers, sizeloc1,
+                   sizeloc2, sizedtype,
+                   critical_point_model, rescaling_function,
+                   critical_operation, bounds, nsamples,
+                   savename_prefix, preprocess_xvals,
+                   preprocess_xvals_prefactor):
+    """
+
+    """
+    # create the results folder if it does
+    # not exist already
+    size_sign = sizeloc1.strip('_')
+    savepath = (f'{savepath}/{size_sign}_{sizelist[0]}_to_{size_sign}_'
+                f'{sizelist[-1]}')
+    if not os.path.isdir(savepath):
+        os.makedirs(savepath)
+    # make the slurmlog folder if it does not
+    # yet exist
+    if not os.path.isdir('slurmlog'):
+        os.makedirs('slurmlog')
+
+    # dependency script folder
+    if not os.path.isdir('slurmlog_dep'):
+        os.makedirs('slurmlog_dep')
+
+    if not os.path.isdir('tmp'):
+        os.makedirs('tmp')
+
+    # get the folder with the data files -> we add
+    # the data_folder name to the names of the temporary
+    # files
+    if os.path.isdir(data_path):
+        data_folder = os.path.split(data_path)[1]
+    else:
+        head, tail = os.path.split(data_path)
+        data_folder = os.path.split(head)[1]
+
+    # get a list of indices in case a parameter sweep over different
+    # sizes is desired
+
+    vals = np.array([np.loadtxt(file) for file in files])
+
+    x = np.array([val[:, int(xcol)] for val in vals])
+    y = np.array([val[:, int(ycol)] for val in vals])
+
+    # cutoff
+    y = np.array([y_[(x[i] > xcrit[0]) & (x[i] < xcrit[1])] for i, y_
+                  in enumerate(y)])
+    x = np.array([x_[(x_ > xcrit[0]) & (x_ < xcrit[1])] for x_ in x])
+
+    # preprocess data
+    # 2 steps -> first, perform multiplication, then do the
+    # required transformation
+    x_prep = _x_val_preprocess(x, 'mult', preprocess_xvals_prefactor)
+    x_prep = _x_val_preprocess(x_prep, preprocess_xvals,
+                               1.0)
+
+    # save a temporary file in npz format
+    tmpdict = {
+        'data_path': data_path,
+        'x': x,
+        'x_prep': x_prep,
+        'y': y,
+        'xcrit': xcrit,
+        'popsize0': popsize0,
+        'maxiter0': maxiter0,
+        'workers': workers,
+        'sizelist': sizelist,
+        'critical_point_model': critical_point_model,
+        'rescaling_function': rescaling_function,
+        'critical_operation': critical_operation,
+        'bounds': bounds,
+        'save_path': savepath,
+        'savename_prefix': savename_prefix,
+        'preprocess_xvals': preprocess_xvals,
+        'preprocess_xvals_prefactor': preprocess_xvals_prefactor,
+    }
+    rnd_num = np.random.randint(0, 10)
+    size_sign = sizeloc1.strip('_')
+    tmpfilename = (f'./tmp/tmpfile_{data_folder}_{critical_point_model}_'
+                   f'{rescaling_function}_rnd_{rnd_num}_'
+                   f'{size_sign}_{sizelist[0]}_to_'
+                   f'{size_sign}_{sizelist[-1]}.npz')
+
+    # perform a size sweep if needed
+    slurmname = (f'./tmp/{{}}_slurm_{data_folder}_{savename_prefix}_'
+                 f'{critical_point_model}_{rescaling_function}_rnd_{rnd_num}'
+                 f'{size_sign}_{sizelist[0]}_to_'
+                 f'{size_sign}_{sizelist[-1]}.npz')
+    np.savez(tmpfilename, **tmpdict)
+
+    # ---------------------------------------------------------
+    #
+    #  SAVE THE ORIGINAL AND PROCESSED DATA
+    #
+    # ---------------------------------------------------------
+    np.savez((f'{savepath}/'
+               '/orig_data.npz'), **{'x': x, 'y': y,
+                                     'sizes': sizelist,
+                                     'desc': savename_prefix})
+    np.savez(f'{savepath}/processed_data_{preprocess_xvals}.npz',
+             **{'x': tmpdict['x_prep'], 'y': tmpdict['y'],
+                'x_operation': tmpdict['preprocess_xvals'],
+                'sizes': tmpdict['sizelist'],
+                'desc': tmpdict['savename_prefix']})
+    return tmpdict, tmpfilename, slurmname, data_folder
+
+
 def main(data_path, savepath, xcrit, xcol, ycol,
          popsize0, maxiter0, workers, sizeloc1,
          sizeloc2, sizedtype,
@@ -137,6 +280,9 @@ def main(data_path, savepath, xcrit, xcol, ycol,
          memcpu=0,
          preprocess_xvals='none',
          preprocess_xvals_prefactor=1.,
+         finite_size_scaling_analysis=False,
+         finite_size_scaling_step=-1,
+         finite_size_scaling_width=-1,
          ):
     """
     A function for preparing the temporary file and
@@ -244,99 +390,110 @@ def main(data_path, savepath, xcrit, xcol, ycol,
         Multiplicative prefactor for the x-data values
         before any transformation is performed.
     """
-    # create the results folder if it does
-    # not exist already
-    if not os.path.isdir(savepath):
-        os.makedirs(savepath)
-    # make the slurmlog folder if it does not
-    # yet exist
-    if not os.path.isdir('slurmlog'):
-        os.makedirs('slurmlog')
 
-    # dependency script folder
-    if not os.path.isdir('slurmlog_dep'):
-        os.makedirs('slurmlog_dep')
-
-    if not os.path.isdir('tmp'):
-        os.makedirs('tmp')
+    # get the dictonary with the temporary job data,
+    # name of the file with the temporary dict,
+    # a template name for various subsequent files
+    # and the name of the folder containing the data
 
     # prepare data to be analyzed
-
     files, sizelist = sort_sizes(data_path, sizeloc1, sizeloc2, sizedtype)
-    vals = np.array([np.loadtxt(file) for file in files])
 
-    x = np.array([val[:, int(xcol)] for val in vals])
-    y = np.array([val[:, int(ycol)] for val in vals])
+    # check if finite-size scaling needs to be performed
+    # check some entries to avoid errors
+    if finite_size_scaling_analysis:
+        if finite_size_scaling_width == -1:
+            raise ValueError(f('{} cannot be set to True '
+                               f'with {finite_size_scaling_width} '
+                               'equal to -1!'))
+        if finite_size_scaling_step == -1:
+            raise ValueError(f('{} cannot be set to True '
+                               f'with {finite_size_scaling_step} '
+                               'equal to -1!'))
+        stacks_width = finite_size_scaling_width
+        stacks_step = finite_size_scaling_step
+    else:
+        stacks_width = len(sizelist)
+        stacks_step = stacks_width
 
-    # cutoff
-    y = np.array([y_[(x[i] > xcrit[0]) & (x[i] < xcrit[1])] for i, y_
-                  in enumerate(y)])
-    x = np.array([x_[(x_ > xcrit[0]) & (x_ < xcrit[1])] for x_ in x])
+    size_stacks = window_stack(np.arange(len(sizelist)),
+                               stacks_step,
+                               stacks_width)
 
-    # preprocess data
-    # 2 steps -> first, perform multiplication, then do the
-    # required transformation
-    x_prep = _x_val_preprocess(x, 'mult', preprocess_xvals_prefactor)
-    x_prep = _x_val_preprocess(x_prep, preprocess_xvals,
-                               1.0)
+    print(size_stacks)
+    for size_stack in size_stacks:
+        files_ = files[size_stack]
+        sizelist_ = sizelist[size_stack]
+        print(sizelist_)
+        tmpdict, tmpfilename, slurname, data_folder = _preprocessing(
+            data_path, files_, sizelist_, savepath, xcrit, xcol, ycol,
+            popsize0, maxiter0, workers, sizeloc1,
+            sizeloc2, sizedtype,
+            critical_point_model, rescaling_function,
+            critical_operation, bounds, nsamples,
+            savename_prefix, preprocess_xvals,
+            preprocess_xvals_prefactor)
+        if not queue:
 
-    # save a temporary file in npz format
-    tmpdict = {
-        'data_path': data_path,
-        'x': x,
-        'x_prep': x_prep,
-        'y': y,
-        'xcrit': xcrit,
-        'popsize0': popsize0,
-        'maxiter0': maxiter0,
-        'workers': workers,
-        'sizelist': sizelist,
-        'critical_point_model': critical_point_model,
-        'rescaling_function': rescaling_function,
-        'critical_operation': critical_operation,
-        'bounds': bounds,
-        'save_path': savepath,
-        'savename_prefix': savename_prefix,
-        'preprocess_xvals': preprocess_xvals,
-        'preprocess_xvals_prefactor': preprocess_xvals_prefactor,
-    }
+            for i in range(nsamples):
 
-    tmpfilename = (f'./tmp/tmpfile_{critical_point_model}_'
-                   f'{rescaling_function}.npz')
-    np.savez(tmpfilename, **tmpdict)
-    np.savez(f'{savepath}/orig_data.npz', **{'x': x, 'y': y,
-                                             'sizes': sizelist,
-                                             'desc': savename_prefix})
-    np.savez(f'{savepath}/processed_data_{preprocess_xvals}.npz',
-             **{'x': x_prep, 'y': y,
-                'x_operation': preprocess_xvals,
-                'sizes': sizelist,
-                'desc': savename_prefix})
+                sp.check_call(f'python main_costfun.py {tmpfilename} {i}',
+                              shell=True)
 
-    if not queue:
-
-        for i in range(nsamples):
-
-            sp.check_call(f'python main_costfun.py {tmpfilename} {i}',
+            sp.check_call(f'python main_collect_costfun.py {tmpfilename}',
                           shell=True)
 
-        sp.check_call(f'rm {tmpfilename}', shell=True)
+            sp.check_call(f'rm {tmpfilename}', shell=True)
 
-    # run on slurm
-    else:
-        with open('utils/sbatch_template.txt', 'r') as file:
-            slurmscript = file.read()
+        # run on slurm
+        else:
+            # prepare a dependency file which does the minimization
+            # jobs, collects the results once everything concludes
+            # and then removes the temporary file at the very end
+            with open('utils/sbatch_template.txt', 'r') as file:
+                slurmscript_run = file.read()
 
-        slurmscript = slurmscript.format(time, ntasks, cputasks,
-                                         memcpu, savename_prefix, 'slurmlog',
-                                         nsamples,
-                                         tmpfilename)
+            # runner script -> write it down with the relevant
+            # parameters
+            slurmscript_run = slurmscript_run.format(time, ntasks, cputasks,
+                                                     memcpu, savename_prefix,
+                                                     'slurmlog',
+                                                     nsamples,
+                                                     tmpfilename)
 
-        slurmname = (f'slurm_{savename_prefix}_'
-                     f'{critical_point_model}_{rescaling_function}')
-        with open(slurmname, 'w') as file:
+            # prepare the collect script -> the one that collects
+            # the results after the first step has completed
+            with open('utils/sbatch_collect_template.txt', 'r') as file:
+                slurmscript_collect = file.read()
 
-            file.write(slurmscript)
+            slurmscript_collect = slurmscript_collect.format(tmpfilename)
 
-        sp.check_call(f'sbatch {slurmname}', shell=True)
-        sp.check_call(f'rm {slurmname}', shell=True)
+            with open('utils/sbatch_remove_template.txt', 'r') as file:
+                slurmscript_remove = file.read()
+
+            sbatchlist = []
+            for pair in [(slurmscript_run, 'main'),
+                         (slurmscript_collect, 'collect')]:
+                with open(slurmname.format(pair[1]), 'w') as file:
+
+                    file.write(pair[0])
+                    sbatchlist.append(slurmname.format(pair[1]))
+
+            slurmscript_remove = slurmscript_remove.format(
+                tmpfilename, *sbatchlist)
+            with open(slurmname.format('remove'), 'w') as file:
+                file.write(slurmscript_remove)
+                sbatchlist.append(slurmname.format('remove'))
+
+            with open('utils/sbatch_dep_template.txt', 'r') as file:
+                slurmscript_dep = file.read()
+
+            slurmscript_dep = slurmscript_dep.format(*sbatchlist)
+
+            # prepare the main dependency script and run it
+            slurmname_dep = slurmname.format('dep')
+            with open(slurmname_dep, 'w') as file:
+
+                file.write(slurmscript_dep)
+            sp.check_call(f'sbatch {slurmname_dep}', shell=True)
+            sp.check_call(f'rm {slurmname_dep}', shell=True)
