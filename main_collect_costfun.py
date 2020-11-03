@@ -39,6 +39,10 @@ def post_main(costfun_path, savedir,
     # load the npz files into memory
     data_objects = [np.load(file, allow_pickle=True)
                     for file in costfun_files]
+
+    if not data_objects:
+        print('No files to be loaded. Exiting!')
+        sys.exit()
     nsamples = len(data_objects)
 
     # prepare/format the data for storing in an external file
