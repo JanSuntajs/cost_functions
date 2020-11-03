@@ -1,5 +1,9 @@
 #!/bin/bash
-#SBATCH --time=00:01:00
+#SBATCH --time=00:03:00
+#SBATCH --output={0}/slurm_dep_%j.out
 
-jid0 = $(sbatch --parsable {0})
-jid1 = $(sbatch --parsable --dependency=afterany:$jid0 {1})
+jid0=$(sbatch --parsable {1})
+jid1=$(sbatch --parsable --dependency=afterany:$jid0 {2})
+jid2=$(sbatch --parsable --dependency=afterany:$jid1 {3})
+
+rm {4}

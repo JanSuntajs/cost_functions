@@ -459,7 +459,8 @@ def main(data_path, savepath, xcrit, xcol, ycol,
                                                      memcpu, savename_prefix,
                                                      'slurmlog',
                                                      nsamples,
-                                                     tmpfilename)
+                                                     tmpfilename,
+                                                     slurmname.format('main'))
 
             # prepare the collect script -> the one that collects
             # the results after the first step has completed
@@ -468,7 +469,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
 
             slurmscript_collect = slurmscript_collect.format(
                 f'{savename_prefix}_collect',
-                'slurmlog', tmpfilename)
+                'slurmlog', tmpfilename, slurmname.format('collect'))
 
             with open('utils/sbatch_remove_template.txt', 'r') as file:
                 slurmscript_remove = file.read()
@@ -491,7 +492,9 @@ def main(data_path, savepath, xcrit, xcol, ycol,
             with open('utils/sbatch_dep_template.txt', 'r') as file:
                 slurmscript_dep = file.read()
 
-            slurmscript_dep = slurmscript_dep.format(*sbatchlist)
+            slurmscript_dep = slurmscript_dep.format('slurmlog_dep',
+                                                     *sbatchlist,
+                                                     slurmname.format('dep'))
 
             # prepare the main dependency script and run it
             slurmname_dep = slurmname.format('dep')
