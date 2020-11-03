@@ -484,7 +484,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
 
             slurmscript_remove = slurmscript_remove.format(
                 f'{savename_prefix}_remove', 'slurmlog',
-                tmpfilename, *sbatchlist)
+                tmpfilename, slurmname.format('remove'))
             with open(slurmname.format('remove'), 'w') as file:
                 file.write(slurmscript_remove)
                 sbatchlist.append(slurmname.format('remove'))
