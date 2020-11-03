@@ -502,4 +502,4 @@ def main(data_path, savepath, xcrit, xcol, ycol,
 
                 file.write(slurmscript_dep)
             sp.check_call(f'sbatch {slurmname_dep}', shell=True)
-            sp.check_call(f'rm {slurmname_dep}', shell=True)
+            # sp.check_call(f'rm {slurmname_dep}', shell=True)
