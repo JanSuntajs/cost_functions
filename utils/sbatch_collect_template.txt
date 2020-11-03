@@ -3,5 +3,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=4096
+#SBATCH --job-name={0}
+#SBATCH --output={1}/slurm_collect_%j.out
 
-srun python main_collect_costfun.py {0}
+srun python main_collect_costfun.py {2}
