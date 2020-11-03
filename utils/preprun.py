@@ -425,7 +425,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
         files_ = files[size_stack]
         sizelist_ = sizelist[size_stack]
         print(sizelist_)
-        tmpdict, tmpfilename, slurname, data_folder = _preprocessing(
+        tmpdict, tmpfilename, slurmname, data_folder = _preprocessing(
             data_path, files_, sizelist_, savepath, xcrit, xcol, ycol,
             popsize0, maxiter0, workers, sizeloc1,
             sizeloc2, sizedtype,
