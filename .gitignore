@@ -3,7 +3,7 @@
 **/slurmlog
 **/results
 **/tmp
-
+**/*runscript*
 # numerical data
 *.npz
 
