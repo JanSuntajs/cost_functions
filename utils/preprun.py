@@ -248,7 +248,7 @@ def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
     slurmname = (f'./tmp/{{}}_slurm_{data_folder}_{savename_prefix}_'
                  f'{critical_point_model}_{rescaling_function}_rnd_{rnd_num}'
                  f'{size_sign}_{sizelist[0]}_to_'
-                 f'{size_sign}_{sizelist[-1]}.npz')
+                 f'{size_sign}_{sizelist[-1]}')
     np.savez(tmpfilename, **tmpdict)
 
     # ---------------------------------------------------------
