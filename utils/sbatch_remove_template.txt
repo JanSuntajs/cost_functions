@@ -7,3 +7,4 @@
 #SBATCH --output={1}/slurm_remove_%j.out
 
 rm {2}
+rm {3}
