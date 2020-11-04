@@ -6,4 +6,7 @@ jid0=$(sbatch --parsable {1})
 jid1=$(sbatch --parsable --dependency=afterany:$jid0 {2})
 jid2=$(sbatch --parsable --dependency=afterany:$jid1 {3})
 
+rm {1}
+rm {2}
+rm {3}
 rm {4}

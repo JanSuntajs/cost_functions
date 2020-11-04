@@ -459,8 +459,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
                                                      memcpu, savename_prefix,
                                                      'slurmlog',
                                                      nsamples,
-                                                     tmpfilename,
-                                                     slurmname.format('main'))
+                                                     tmpfilename)
 
             # prepare the collect script -> the one that collects
             # the results after the first step has completed
@@ -469,7 +468,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
 
             slurmscript_collect = slurmscript_collect.format(
                 f'{savename_prefix}_collect',
-                'slurmlog', tmpfilename, slurmname.format('collect'))
+                'slurmlog', tmpfilename)
 
             with open('utils/sbatch_remove_template.txt', 'r') as file:
                 slurmscript_remove = file.read()
@@ -484,7 +483,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
 
             slurmscript_remove = slurmscript_remove.format(
                 f'{savename_prefix}_remove', 'slurmlog',
-                tmpfilename, slurmname.format('remove'))
+                tmpfilename)
             with open(slurmname.format('remove'), 'w') as file:
                 file.write(slurmscript_remove)
                 sbatchlist.append(slurmname.format('remove'))

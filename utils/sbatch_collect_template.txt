@@ -7,5 +7,3 @@
 #SBATCH --output={1}/slurm_collect_%j.out
 
 srun python main_collect_costfun.py {2}
-
-rm {3}
