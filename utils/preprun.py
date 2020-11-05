@@ -133,7 +133,19 @@ def _x_val_preprocess(xvals, preprocess_type='none', prefactor=1.):
         Multiplicative prefactor for the x-data values
         before any transformation is performed.
 
+    Returns:
+    --------
+    ndarray: preprocessed input data
+
+    inv_fun: function
+             The inverse of the preprocessing function.
+
     """
+
+    # define also the inverse function which can be used
+    # in case the rescaling ansatz needs the data in
+    # the non-processed form
+
     def _id(x):
         return x
 
@@ -143,20 +155,32 @@ def _x_val_preprocess(xvals, preprocess_type='none', prefactor=1.):
     def _mult(x):
         return prefactor * x
 
+    def _divide(x):
+        return (1. / prefactor) * x
+
+    def _pow10(x):
+
+        return 10.**x
+
     if preprocess_type == 'none':
         fun = _id
+        inv_fun = _id
     elif preprocess_type == 'log':
         fun = np.log
+        inv_fun = np.exp
     elif preprocess_type == 'log10':
         fun = np.log10
+        inv_fun = _pow10
     elif preprocess_type == 'inv':
         fun = _inv
+        inv_fun = inv
     elif preprocess_type == 'mult':
         fun = _mult
+        inv_fun = _divide
     else:
         raise ValueError(f'{preprocess_type} not yet implemented!')
 
-    return np.array([fun(xval) for xval in xvals])
+    return np.array([fun(xval) for xval in xvals]), inv_fun
 
 
 def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
@@ -213,9 +237,9 @@ def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
     # preprocess data
     # 2 steps -> first, perform multiplication, then do the
     # required transformation
-    x_prep = _x_val_preprocess(x, 'mult', preprocess_xvals_prefactor)
-    x_prep = _x_val_preprocess(x_prep, preprocess_xvals,
-                               1.0)
+    x_prep, *_ = _x_val_preprocess(x, 'mult', preprocess_xvals_prefactor)
+    x_prep, inv_fun = _x_val_preprocess(x_prep, preprocess_xvals,
+                                        1.0)
 
     # save a temporary file in npz format
     tmpdict = {

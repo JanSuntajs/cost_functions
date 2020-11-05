@@ -12,12 +12,91 @@ presented in the .txt format which is the
 most convenient for subsequent plotting and
 quick inspection.
 
+Also, a basic plot is prepared for
+inspection purposes.
+
+
 """
 
 import numpy as np
 from glob import glob
 import sys
 import os
+
+from matplotlib import pyplot as plt
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
+
+from functions.costfun import rescale_xvals
+
+# -------------------------------------------------
+#
+# PLOTTER TOOLS
+#
+# -------------------------------------------------
+plt.rc('font', family='sans-serif')
+plt.rc('text', usetex=True)
+plt.rc('font', family='serif', serif=['Computer Modern'])
+plt.rc('xtick', labelsize='medium')
+plt.rc('ytick', labelsize='medium')
+
+fontsize = [34, 38, 38]
+figsize = (12, 8)
+
+
+def prepare_ax(ax, plot_mbl_ergodic=False, legend=True, fontsize=fontsize,
+               grid=True,
+               ncol=2):
+
+    ax.tick_params(axis='x', labelsize=fontsize[1], pad=5, direction='out')
+    if legend:
+        ax.legend(loc='best', prop={
+                  'size': fontsize[0]}, fontsize=fontsize[0],
+                  framealpha=0.5, ncol=ncol)
+    ax.tick_params(axis='x', labelsize=fontsize[1])
+    ax.tick_params(axis='y', labelsize=fontsize[1])
+    if grid:
+        ax.grid(which='both')
+
+def prepare_plt(savename='', graphs_folder='',
+                top=0.89, save=True, show=True):
+
+    plt.tight_layout()
+    plt.subplots_adjust(top=top)
+    if save:
+        if not os.path.isdir(graphs_folder):
+            os.makedirs(graphs_folder)
+
+        plt.savefig(graphs_folder + '/' + savename)
+    if show:
+
+        plt.show()
+
+
+def prepare_axarr(nrows=1, ncols=2, sharex=True, sharey=True,
+                  fontsize=fontsize, figsize=figsize):
+
+    figsize = (ncols * figsize[0], nrows * figsize[1])
+
+    fig, axarr = plt.subplots(
+        nrows, ncols, figsize=figsize, sharex=sharex, sharey=sharey)
+
+    return fig, axarr, fontsize
+
+
+def add_letter(ax, letter, loc, fontsize=fontsize):
+    ax.text(
+        loc[0],
+        loc[1],
+        '{}'.format(letter),
+        fontsize=fontsize[-1],
+        transform=ax.transAxes,
+        color='black')
+
+# -------------------------------------------------
+#
+# POSTPROCESSING JOBS
+#
+# -------------------------------------------------
 
 
 _special_keys = ['params', 'costfun_value', 'nfev', 'nit', 'bounds']
@@ -147,3 +226,50 @@ if __name__ == '__main__':
      proc_data, storevals, data_objects) = post_main(
         f'{loadpath}/{loadname_prefix}*', savepath,
         savename)
+
+    # ----------------------------------------------------
+    #
+    #  PLOT A FIGURE
+    #
+    # ----------------------------------------------------
+    fwidth, fheight = (12, 8)
+    fontsize = [24, 38, 38]
+    fig, axarr, fontsize = prepare_axarr(3, 1, False, False)
+
+    orig_data = np.load(f'{loadpath}/orig_data.npz', allow_pickle=True)
+    proc_data = np.load(glob(f'{loadpath}/processed*')[0], allow_pickle=True)
+
+    # plot the original data
+    for i, xval in enumerate(orig_data['x']):
+
+        axarr[0].plot(xval, orig_data['y'][i], 'o-', ms=3,
+                      label=f'$L={orig_data["sizes"][i]}$')
+    axarr[0].set_xlabel('$x_\\mathrm{{orig.}}$', fontsize=fontsize[-1])
+    axarr[0].set_ylabel('$y$', fontsize=fontsize[-1])
+    # plot the processed data
+    for i, xval in enumerate(proc_data['x']):
+        axarr[1].plot(xval, proc_data['y'][i], 'o-', ms=3,
+                      label=f'$L={proc_data["sizes"][i]}$')
+    axarr[1].set_xlabel('$x_\\mathrm{{proc.}}$', fontsize=fontsize[-1])
+    axarr[1].set_ylabel('$y$', fontsize=fontsize[-1])
+    # plot the rescaled data
+    x_rescaled = rescale_xvals(proc_data['x'], proc_data['sizes'],
+                               str(initdict['critical_point_model']),
+                               str(initdict['rescaling_function']),
+                               str(initdict['critical_operation']),
+                               *opt_params)
+
+    for i, xval in enumerate(x_rescaled):
+
+        axarr[2].plot(xval, proc_data['y'][i], 'o-', ms=3,
+                      label=f'$L={proc_data["sizes"][i]}$')
+    axarr[2].set_xlabel('$L/\\xi$', fontsize=fontsize[-1])
+    axarr[2].set_ylabel('$y$', fontsize=fontsize[-1])
+    axarr[2].set_title(f'$\\mathcal{{C}}={costfun_val:.4f}$', fontsize=fontsize[-1])
+    legend = True
+    for i, ax in enumerate(axarr):
+        if i > 0:
+            legend = False
+        prepare_ax(ax, legend=legend, grid=False)
+
+    prepare_plt(f'{savename}.pdf', savepath, top=0.96, show=False)
