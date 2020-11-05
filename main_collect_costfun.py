@@ -23,6 +23,8 @@ from glob import glob
 import sys
 import os
 
+import matplotlib as mpl
+mpl.use('Agg')
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
 
