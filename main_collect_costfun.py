@@ -28,7 +28,7 @@ mpl.use('Agg')
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
 
-from functions.costfun import rescale_xvals
+from functions.costfun import rescale_xvals, pad_vals
 
 # -------------------------------------------------
 #
@@ -255,7 +255,9 @@ if __name__ == '__main__':
     axarr[1].set_xlabel('$x_\\mathrm{{proc.}}$', fontsize=fontsize[-1])
     axarr[1].set_ylabel('$y$', fontsize=fontsize[-1])
     # plot the rescaled data
-    x_rescaled = rescale_xvals(proc_data['x'], proc_data['sizes'],
+
+    x_data, y_data = pad_vals(proc_data['x'], proc_data['y'])
+    x_rescaled = rescale_xvals(x_data, proc_data['sizes'],
                                str(initdict['critical_point_model']),
                                str(initdict['rescaling_function']),
                                str(initdict['critical_operation']),
@@ -263,7 +265,7 @@ if __name__ == '__main__':
 
     for i, xval in enumerate(x_rescaled):
 
-        axarr[2].plot(xval, proc_data['y'][i], 'o-', ms=3,
+        axarr[2].plot(xval, y_data[i], 'o-', ms=3,
                       label=f'$L={proc_data["sizes"][i]}$')
     axarr[2].set_xlabel('$L/\\xi$', fontsize=fontsize[-1])
     axarr[2].set_ylabel('$y$', fontsize=fontsize[-1])
