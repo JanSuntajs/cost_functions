@@ -65,7 +65,8 @@ def pad_vals(x, y):
 
 def rescale_xvals(x, sizelist, x_crit_fun, rescale_fun,
                   rescale_type,
-                  *args):
+                  *args,
+                  return_crit_vals=False):
     """
     Rescale the independent variable values by:
 
@@ -109,6 +110,11 @@ def rescale_xvals(x, sizelist, x_crit_fun, rescale_fun,
     if rescale_type = 'div' (divide)
     x_ = x / x_crit
 
+    return_crit_vals: boolean, optional
+    Whether to also return the critical parameter
+    values along with the rescaled x-values.
+    Defaults to False.
+
     *params_crit, *params_rescale: tuple
     Parameters for the x_crit_fun and
     rescale_fun, respectively.
@@ -120,6 +126,10 @@ def rescale_xvals(x, sizelist, x_crit_fun, rescale_fun,
     A 2D array of rescaled independent
     variable values for each involved
     system size.
+
+    x_crit: 1D ndarray
+    1D array of critical parameter values.
+    Only returned if return_crit_vals==True.
 
     Raises:
     -------
@@ -173,7 +183,10 @@ def rescale_xvals(x, sizelist, x_crit_fun, rescale_fun,
 
     rescale_x = rescale_fun(x_, sizelist, *params_rescale)
 
-    return rescale_x
+    if return_crit_vals:
+        return rescale_x, x_crit
+    else:
+        return rescale_x
 
 
 def minimization_fun(params, x, y, sizelist, x_crit_fun,

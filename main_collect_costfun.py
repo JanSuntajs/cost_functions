@@ -41,7 +41,7 @@ plt.rc('font', family='serif', serif=['Computer Modern'])
 plt.rc('xtick', labelsize='medium')
 plt.rc('ytick', labelsize='medium')
 
-fontsize = [34, 38, 38]
+fontsize = [27, 38, 38]
 figsize = (12, 8)
 
 
@@ -211,6 +211,11 @@ if __name__ == '__main__':
 
     # load into a dictionary
     initdict = {key: value for key, value in initfile.items()}
+
+    rescale_model = str(initdict['rescaling_function']
+                        ).upper().replace('_', ' ')
+    crit_model = str(initdict['critical_point_model']
+                     ).lower().replace('_', ' ')
     # print(initdict)
     loadpath = str(initdict['save_path'])
     loadname_prefix = str(initdict['savename_prefix'])
@@ -235,8 +240,8 @@ if __name__ == '__main__':
     #
     # ----------------------------------------------------
     fwidth, fheight = (12, 8)
-    fontsize = [24, 38, 38]
-    fig, axarr, fontsize = prepare_axarr(3, 1, False, False)
+    #fontsize = [24, 38, 38]
+    fig, axarr, fontsize = prepare_axarr(2, 2, False, False)
 
     orig_data = np.load(f'{loadpath}/orig_data.npz', allow_pickle=True)
     proc_data = np.load(glob(f'{loadpath}/processed*')[0], allow_pickle=True)
@@ -244,36 +249,45 @@ if __name__ == '__main__':
     # plot the original data
     for i, xval in enumerate(orig_data['x']):
 
-        axarr[0].plot(xval, orig_data['y'][i], 'o-', ms=3,
-                      label=f'$L={orig_data["sizes"][i]}$')
-    axarr[0].set_xlabel('$x_\\mathrm{{orig.}}$', fontsize=fontsize[-1])
-    axarr[0].set_ylabel('$y$', fontsize=fontsize[-1])
+        axarr[0][0].plot(xval, orig_data['y'][i], 'o-', ms=3,
+                         label=f'$L={orig_data["sizes"][i]}$')
+    axarr[0][0].set_xlabel('$x_\\mathrm{{orig.}}$', fontsize=fontsize[-1])
+    axarr[0][0].set_ylabel('$y$', fontsize=fontsize[-1])
     # plot the processed data
     for i, xval in enumerate(proc_data['x']):
-        axarr[1].plot(xval, proc_data['y'][i], 'o-', ms=3,
-                      label=f'$L={proc_data["sizes"][i]}$')
-    axarr[1].set_xlabel('$x_\\mathrm{{proc.}}$', fontsize=fontsize[-1])
-    axarr[1].set_ylabel('$y$', fontsize=fontsize[-1])
+        axarr[0][1].plot(xval, proc_data['y'][i], 'o-', ms=3,
+                         label=f'$L={proc_data["sizes"][i]}$')
+    axarr[0][1].set_xlabel('$x_\\mathrm{{proc.}}$', fontsize=fontsize[-1])
+    axarr[0][1].set_ylabel('$y$', fontsize=fontsize[-1])
     # plot the rescaled data
 
     x_data, y_data = pad_vals(proc_data['x'], proc_data['y'])
-    x_rescaled = rescale_xvals(x_data, proc_data['sizes'],
-                               str(initdict['critical_point_model']),
-                               str(initdict['rescaling_function']),
-                               str(initdict['critical_operation']),
-                               *opt_params)
+    x_rescaled, x_crit = rescale_xvals(x_data, proc_data['sizes'],
+                                       str(initdict['critical_point_model']),
+                                       str(initdict['rescaling_function']),
+                                       str(initdict['critical_operation']),
+                                       *opt_params,
+                                       return_crit_vals=True)
 
     for i, xval in enumerate(x_rescaled):
 
-        axarr[2].plot(xval, y_data[i], 'o-', ms=3,
-                      label=f'$L={proc_data["sizes"][i]}$')
-    axarr[2].set_xlabel('$L/\\xi$', fontsize=fontsize[-1])
-    axarr[2].set_ylabel('$y$', fontsize=fontsize[-1])
-    axarr[2].set_title(f'$\\mathcal{{C}}={costfun_val:.4f}$', fontsize=fontsize[-1])
+        axarr[1][0].plot(xval, y_data[i], 'o-', ms=3,
+                         label=f'$L={proc_data["sizes"][i]}$')
+    axarr[1][0].set_xlabel('$L/\\xi$', fontsize=fontsize[-1])
+    axarr[1][0].set_ylabel('$y$', fontsize=fontsize[-1])
+    axarr[1][0].set_title(f'$\\mathcal{{C}}_'
+                          f'{{\\mathrm{{{rescale_model}}}}}'
+                          f'^{{\\mathrm{{{crit_model}}}}}'
+                          f'={costfun_val:.4f}$',
+                          fontsize=fontsize[-1])
+
+    axarr[1][1].scatter(proc_data['sizes'], x_crit)
+    axarr[1][1].set_xlabel('$L$', fontsize=fontsize[-1])
+    axarr[1][1].set_ylabel('$x_{\\mathrm{crit}}$', fontsize=fontsize[-1])
     legend = True
-    for i, ax in enumerate(axarr):
+    for i, ax in enumerate(axarr.flatten()):
         if i > 0:
             legend = False
-        prepare_ax(ax, legend=legend, grid=False)
+        prepare_ax(ax, legend=legend, grid=False, ncol=1)
 
     prepare_plt(f'{savename}.pdf', savepath, top=0.96, show=False)
