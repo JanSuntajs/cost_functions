@@ -6,4 +6,6 @@
 #SBATCH --job-name={0}
 #SBATCH --output={1}/slurm_collect_%j.out
 
+{3}
+
 srun python main_collect_costfun.py {2}

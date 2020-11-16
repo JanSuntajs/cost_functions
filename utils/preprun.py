@@ -310,7 +310,8 @@ def main(data_path, savepath, xcrit, xcol, ycol,
          finite_size_scaling_analysis=False,
          finite_size_scaling_step=-1,
          finite_size_scaling_width=-1,
-         savepath_presentation_data=None):
+         savepath_presentation_data=None,
+         cmdoptlist=[''],):
     """
     A function for preparing the temporary file and
     running the main script, either sequentially or
@@ -496,10 +497,10 @@ def main(data_path, savepath, xcrit, xcol, ycol,
             # the results after the first step has completed
             with open('utils/sbatch_collect_template.txt', 'r') as file:
                 slurmscript_collect = file.read()
-
+            cmdopt = '\n'.join(cmdoptlist)
             slurmscript_collect = slurmscript_collect.format(
                 f'{savename_prefix}_collect',
-                'slurmlog', tmpfilename)
+                'slurmlog', tmpfilename, cmdopt)
 
             with open('utils/sbatch_remove_template.txt', 'r') as file:
                 slurmscript_remove = file.read()
