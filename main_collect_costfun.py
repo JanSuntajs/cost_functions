@@ -314,10 +314,10 @@ if __name__ == '__main__':
         prepare_ax(ax, legend=legend, grid=False, ncol=1)
 
     prepare_plt(f'{savename}.pdf', savepath, top=0.96, show=False)
-    save_rescaled_data(x_rescaled, xcrit, y_data, proc_data['sizes'],
+    save_rescaled_data(x_rescaled, x_crit, y_data, proc_data['sizes'],
                        costfun_val, opt_params, savepath)
     if save_double:
         prepare_plt(f'{savename}.pdf', save_processed_path,
                     top=0.96, show=False)
-        save_rescaled_data(x_rescaled, xcrit, y_data, proc_data['sizes'],
+        save_rescaled_data(x_rescaled, x_crit, y_data, proc_data['sizes'],
                            costfun_val, opt_params, save_processed_path)
