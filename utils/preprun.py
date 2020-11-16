@@ -197,7 +197,7 @@ def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
     # create the results folder if it does
     # not exist already
 
-    is savepath_presentation_data == None:
+    if savepath_presentation_data is None:
         savepath_presentation_data = savepath
     size_sign = sizeloc1.strip('_')
     savepath = (f'{savepath}/{size_sign}_{sizelist[0]}_to_{size_sign}_'
