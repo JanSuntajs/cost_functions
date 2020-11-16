@@ -107,7 +107,7 @@ _save_keys = ['savename_prefix', 'critical_point_model',
               'save_path']
 
 def save_rescaled_data(xvals, xcrit, yvals, sizelist, costfun, opt_params,
-                       savepath):
+                       savepath, savename):
 
     savefile = {
         'xvals': xvals,
@@ -118,7 +118,7 @@ def save_rescaled_data(xvals, xcrit, yvals, sizelist, costfun, opt_params,
         'opt_params': opt_params
     }
 
-    np.savez(f'{savepath}/presentation_data.npz', **savefile)
+    np.savez(f'{savepath}/{savename}_presentation_data.npz', **savefile)
 
 
 def post_main(costfun_path, savedir,
@@ -315,9 +315,9 @@ if __name__ == '__main__':
 
     prepare_plt(f'{savename}.pdf', savepath, top=0.96, show=False)
     save_rescaled_data(x_rescaled, x_crit, y_data, proc_data['sizes'],
-                       costfun_val, opt_params, savepath)
+                       costfun_val, opt_params, savepath, savename)
     if save_double:
         prepare_plt(f'{savename}.pdf', save_processed_path,
                     top=0.96, show=False)
         save_rescaled_data(x_rescaled, x_crit, y_data, proc_data['sizes'],
-                           costfun_val, opt_params, save_processed_path)
+                           costfun_val, opt_params, save_processed_path, savename)
