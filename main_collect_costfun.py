@@ -76,7 +76,6 @@ def prepare_plt(savename='', graphs_folder='',
 
 def prepare_axarr(nrows=1, ncols=2, sharex=True, sharey=True,
                   fontsize=fontsize, figsize=figsize):
-
     figsize = (ncols * figsize[0], nrows * figsize[1])
 
     fig, axarr = plt.subplots(
@@ -106,6 +105,20 @@ _special_keys = ['params', 'costfun_value', 'nfev', 'nit', 'bounds']
 _save_keys = ['savename_prefix', 'critical_point_model',
               'rescaling_function', 'preprocess_xvals',
               'save_path']
+
+def save_rescaled_data(xvals, xcrit, yvals, sizelist, costfun, opt_params,
+                       savepath):
+
+    savefile = {
+        'xvals': xvals,
+        'xcrit': xcrit,
+        'yvals': yvals,
+        'sizelist': sizelist,
+        'costfun': costfun,
+        'opt_params': opt_params
+    }
+
+    np.savez(f'{savepath}/presentation_data.npz', **savefile)
 
 
 def post_main(costfun_path, savedir,
@@ -220,6 +233,8 @@ if __name__ == '__main__':
     loadpath = str(initdict['save_path'])
     loadname_prefix = str(initdict['savename_prefix'])
 
+    save_processed_path = str(initdict['save_path_presentation_data'])
+
     savepath = f'{loadpath}/txtfiles/'
     savename_prefix = loadname_prefix
     savename = ('{0}_{4}_crit_point_scaling_'
@@ -233,6 +248,14 @@ if __name__ == '__main__':
      proc_data, storevals, data_objects) = post_main(
         f'{loadpath}/{loadname_prefix}*', savepath,
         savename)
+
+    save_double = not (loadpath == save_processed_path)
+    if save_double:
+        post_main(f'{loadpath}/{loadname_prefix}*',
+                  save_processed_path,
+                  savename)
+    else:
+        pass
 
     # ----------------------------------------------------
     #
@@ -291,3 +314,10 @@ if __name__ == '__main__':
         prepare_ax(ax, legend=legend, grid=False, ncol=1)
 
     prepare_plt(f'{savename}.pdf', savepath, top=0.96, show=False)
+    save_rescaled_data(x_rescaled, xcrit, y_data, proc_data['sizes'],
+                       costfun_val, opt_params, savepath)
+    if save_double:
+        prepare_plt(f'{savename}.pdf', save_processed_path,
+                    top=0.96, show=False)
+        save_rescaled_data(x_rescaled, xcrit, y_data, proc_data['sizes'],
+                           costfun_val, opt_params, save_processed_path)

@@ -189,12 +189,16 @@ def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
                    critical_point_model, rescaling_function,
                    critical_operation, bounds, nsamples,
                    savename_prefix, preprocess_xvals,
-                   preprocess_xvals_prefactor):
+                   preprocess_xvals_prefactor,
+                   savepath_presentation_data=None):
     """
 
     """
     # create the results folder if it does
     # not exist already
+
+    is savepath_presentation_data == None:
+        savepath_presentation_data = savepath
     size_sign = sizeloc1.strip('_')
     savepath = (f'{savepath}/{size_sign}_{sizelist[0]}_to_{size_sign}_'
                 f'{sizelist[-1]}')
@@ -260,6 +264,7 @@ def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
         'savename_prefix': savename_prefix,
         'preprocess_xvals': preprocess_xvals,
         'preprocess_xvals_prefactor': preprocess_xvals_prefactor,
+        'save_path_presentation_data': savepath_presentation_data,
     }
     rnd_num = np.random.randint(0, 10)
     size_sign = sizeloc1.strip('_')
