@@ -36,8 +36,8 @@ from functions.costfun import rescale_xvals, pad_vals
 #
 # -------------------------------------------------
 plt.rc('font', family='sans-serif')
-plt.rc('text', usetex=True)
-plt.rc('font', family='serif', serif=['Computer Modern'])
+#plt.rc('text', usetex=True)
+#plt.rc('font', family='serif', serif=['Computer Modern'])
 plt.rc('xtick', labelsize='medium')
 plt.rc('ytick', labelsize='medium')
 
@@ -274,13 +274,13 @@ if __name__ == '__main__':
 
         axarr[0][0].plot(xval, orig_data['y'][i], 'o-', ms=3,
                          label=f'$L={orig_data["sizes"][i]}$')
-    axarr[0][0].set_xlabel('$x_\\mathrm{{orig.}}$', fontsize=fontsize[-1])
+    axarr[0][0].set_xlabel('$x_{{orig.}}$', fontsize=fontsize[-1])
     axarr[0][0].set_ylabel('$y$', fontsize=fontsize[-1])
     # plot the processed data
     for i, xval in enumerate(proc_data['x']):
         axarr[0][1].plot(xval, proc_data['y'][i], 'o-', ms=3,
                          label=f'$L={proc_data["sizes"][i]}$')
-    axarr[0][1].set_xlabel('$x_\\mathrm{{proc.}}$', fontsize=fontsize[-1])
+    axarr[0][1].set_xlabel('$x_{{proc.}}$', fontsize=fontsize[-1])
     axarr[0][1].set_ylabel('$y$', fontsize=fontsize[-1])
     # plot the rescaled data
 
@@ -298,15 +298,15 @@ if __name__ == '__main__':
                          label=f'$L={proc_data["sizes"][i]}$')
     axarr[1][0].set_xlabel('$L/\\xi$', fontsize=fontsize[-1])
     axarr[1][0].set_ylabel('$y$', fontsize=fontsize[-1])
-    axarr[1][0].set_title(f'$\\mathcal{{C}}_'
-                          f'{{\\mathrm{{{rescale_model}}}}}'
-                          f'^{{\\mathrm{{{crit_model}}}}}'
+    axarr[1][0].set_title(f'${{C}}_'
+                          f'{{{{{rescale_model}}}}}'
+                          f'^{{{{{crit_model}}}}}'
                           f'={costfun_val:.4f}$',
                           fontsize=fontsize[-1])
 
     axarr[1][1].scatter(proc_data['sizes'], x_crit)
     axarr[1][1].set_xlabel('$L$', fontsize=fontsize[-1])
-    axarr[1][1].set_ylabel('$x_{\\mathrm{crit}}$', fontsize=fontsize[-1])
+    axarr[1][1].set_ylabel('$x_{crit}$', fontsize=fontsize[-1])
     legend = True
     for i, ax in enumerate(axarr.flatten()):
         if i > 0:
