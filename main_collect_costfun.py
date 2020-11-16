@@ -318,7 +318,8 @@ if __name__ == '__main__':
     # prepare_plt(f'{savename}.pdf', savepath, top=0.96, show=False)
 
     if save_double:
+        save_rescaled_data(x_rescaled, x_crit, y_data, proc_data['sizes'],
+                           costfun_val, opt_params, save_processed_path,
+                           savename)
         prepare_plt(f'{savename}.pdf', save_processed_path,
                     top=0.96, show=False)
-        save_rescaled_data(x_rescaled, x_crit, y_data, proc_data['sizes'],
-                           costfun_val, opt_params, save_processed_path, savename)
