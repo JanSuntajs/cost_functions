@@ -190,15 +190,13 @@ def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
                    critical_operation, bounds, nsamples,
                    savename_prefix, preprocess_xvals,
                    preprocess_xvals_prefactor,
-                   savepath_presentation_data=None):
+                   savepath_presentation_data):
     """
 
     """
     # create the results folder if it does
     # not exist already
 
-    if savepath_presentation_data is None:
-        savepath_presentation_data = savepath
     size_sign = sizeloc1.strip('_')
     savepath = (f'{savepath}/{size_sign}_{sizelist[0]}_to_{size_sign}_'
                 f'{sizelist[-1]}')
@@ -312,7 +310,7 @@ def main(data_path, savepath, xcrit, xcol, ycol,
          finite_size_scaling_analysis=False,
          finite_size_scaling_step=-1,
          finite_size_scaling_width=-1,
-         ):
+         savepath_presentation_data=None):
     """
     A function for preparing the temporary file and
     running the main script, either sequentially or
@@ -426,6 +424,9 @@ def main(data_path, savepath, xcrit, xcol, ycol,
     # and the name of the folder containing the data
 
     # prepare data to be analyzed
+
+    if savepath_presentation_data is None:
+        savepath_presentation_data = savepath
     files, sizelist = sort_sizes(data_path, sizeloc1, sizeloc2, sizedtype)
 
     # check if finite-size scaling needs to be performed
@@ -461,7 +462,8 @@ def main(data_path, savepath, xcrit, xcol, ycol,
             critical_point_model, rescaling_function,
             critical_operation, bounds, nsamples,
             savename_prefix, preprocess_xvals,
-            preprocess_xvals_prefactor)
+            preprocess_xvals_prefactor,
+            savepath_presentation_data)
         if not queue:
 
             for i in range(nsamples):
