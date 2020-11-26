@@ -98,6 +98,24 @@ def _rescale_pl(x, sizelist, nu):
     return rescale_x
 
 
+def _rescale_pl_irrel(x, sizelist, nu, a0, a1, a2):
+    """
+    Rescaling according to the power-law scaling which includes
+    the irrelevant contribution.
+    Rescaling function:
+
+    x_pl_irr = sgn(x) * size * abs(x) ** nu + a0*size**(-1)+
+               a1*size + a2*size**2
+    """
+    sizelist = np.array(sizelist)
+
+    rescale_x = _rescale_pl(x, sizelist, nu)
+
+    rescale_x += (a0 * sizelist**(-1) + a1 * sizelist + a2 * sizelist**2)
+
+    return rescale_x
+
+
 def _rescale_id(x, sizelist):
     """
     Identity function for rescaling which
