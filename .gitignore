@@ -2,6 +2,7 @@
 **/log
 **/slurmlog
 **/results
+**/pretty_prints
 **/tmp
 **/*runscript*
 # numerical data
