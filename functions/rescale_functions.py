@@ -111,6 +111,7 @@ def _rescale_pl_irrel(x, sizelist, nu, a0, a1, a2):
     rescale_x = _rescale_pl(x, sizelist, nu)
 
     sizelist = 1.0 * np.array(sizelist)
+    sizelist = sizelist[:, np.newaxis]
 
     rescale_x += (a0 * sizelist**(-1.) + a1 * sizelist + a2 * sizelist**2.)
 
