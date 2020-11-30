@@ -264,7 +264,7 @@ def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
         'preprocess_xvals_prefactor': preprocess_xvals_prefactor,
         'save_path_presentation_data': savepath_presentation_data,
     }
-    rnd_num = np.random.randint(0, 10)
+    rnd_num = np.random.randint(0, 10000)
     size_sign = sizeloc1.strip('_')
     tmpfilename = (f'./tmp/tmpfile_{data_folder}_{critical_point_model}_'
                    f'{rescaling_function}_rnd_{rnd_num}_'
