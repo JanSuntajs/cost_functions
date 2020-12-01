@@ -349,3 +349,40 @@ def _x_crit_inv_log(sizelist, x0, x1):
     """
     x0, x1 = list(map(np.float64, [x0, x1]))
     return x0 + x1 / np.log(sizelist)
+
+
+def _x_crit_inv_pow(sizelist, x0, x1, power):
+    """
+    A model for inverse log scaling of
+    the critical disorder strength
+    with system size according to the
+    equation:
+
+    x_crit = x0 + x1 / size**pow
+
+    Parameters:
+    -----------
+
+    sizelist: 1D array or 1D array-like
+    Array of system sizes involved in
+    the scaling analysis.
+
+    x0: float
+    The subleading term in the proposed
+    dependence.
+
+    x1: float
+    The leading term in the proposed dependence.
+
+    power: float
+    Exponent in the inverse size dependence.
+
+    Returns:
+    --------
+
+    1D ndarray:
+    An array of critical parameter values
+    for each involved system size.
+    """
+    x0, x1, power = list(map(np.float64, [x0, x1, power]))
+    return x0 + x1 / np.array(sizelist)**power
