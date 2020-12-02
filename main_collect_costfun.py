@@ -256,7 +256,7 @@ if __name__ == '__main__':
     (costfun_val, opt_params, orig_data,
      proc_data, storevals, data_objects) = post_main(
         f'{loadpath}/{loadname_prefix}*', savepath,
-        savename)
+        savename, npoints)
 
     save_double = not (loadpath == save_processed_path)
     if save_double:
