@@ -257,6 +257,10 @@ def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
                   in enumerate(y)])
     x = np.array([x_[(x_ > xcrit[0]) & (x_ < xcrit[1])] for x_ in x])
 
+    # count the number of points
+    numpoints = 0
+    for xval in x:
+        numpoints += xval.shape[0]
     # -----------------------------------------------------
     #
     # PREPROCESSING OF THE DATA -> multiplication, then
@@ -288,6 +292,7 @@ def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
         'preprocess_xvals': preprocess_xvals,
         'preprocess_xvals_prefactor': preprocess_xvals_prefactor,
         'save_path_presentation_data': savepath_presentation_data,
+        'npoints': numpoints,
     }
     rnd_num = np.random.randint(0, 10000)
     size_sign = sizeloc1.strip('_')
@@ -317,7 +322,8 @@ def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
                 'x_orig': x_, 'y_orig': y_,
                 'x_operation': tmpdict['preprocess_xvals'],
                 'sizes': tmpdict['sizelist'],
-                'desc': tmpdict['savename_prefix']})
+                'desc': tmpdict['savename_prefix'],
+                'npoints': numpoints})
     return tmpdict, tmpfilename, slurmname, data_folder
 
 
