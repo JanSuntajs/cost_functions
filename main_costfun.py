@@ -31,7 +31,8 @@ if __name__ == '__main__':
     y = initdict['y']
 
     x, y = pad_vals(x, y)
-
+    # count the number of points
+    numpoints = np.count_nonzero(~np.isnan(x))
     sizelist = initdict['sizelist']
 
     popsize0 = int(initdict['popsize0'])
@@ -66,6 +67,7 @@ if __name__ == '__main__':
             'costfun_value': optRes.fun,
             'nfev': optRes.nfev,
             'nit': optRes.nit,
+            'npoints': numpoints,
             'critical_point': critical_point,
             'rescaling_function': rescaling_function,
             'critical_point_operation': crit_operation,
@@ -84,4 +86,3 @@ if __name__ == '__main__':
                   f'_preprocess_{x_prep_operation}'
                   f'_prefactor_{x_prep_prefactor}'
                   f'_{seed}.npz'), **savefile)
-

@@ -228,17 +228,42 @@ def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
 
     vals = np.array([np.loadtxt(file) for file in files])
 
+    # ---------------------------------------------------
+    # ORIGINAL DATA
+    # ---------------------------------------------------
     x = np.array([val[:, int(xcol)] for val in vals])
     y = np.array([val[:, int(ycol)] for val in vals])
 
-    # cutoff
+    # ---------------------------------------------------
+    # Prepare these data for later stages -> in case we
+    # wish to represent the rescaling with some set
+    # of optimization parameters on the original data,
+    # before the cut off was applied. We do, however,
+    # perform multiplication if needed. The data are then
+    # stored as 'original data' in the processed data
+    # .npz binary file.
+    # ---------------------------------------------------
+    x_ = np.copy(x)
+    y_ = np.copy(y)
+    x_, *_ = _x_val_preprocess(x_, 'mult', preprocess_xvals_prefactor)
+
+    # ---------------------------------------------------
+    #
+    # NARROW THE INTERVAL OF X REGIONS TO EXCLUDE RIGHT-
+    # AND LEFTMOST VALUES.
+    #
+    # ---------------------------------------------------
     y = np.array([y_[(x[i] > xcrit[0]) & (x[i] < xcrit[1])] for i, y_
                   in enumerate(y)])
     x = np.array([x_[(x_ > xcrit[0]) & (x_ < xcrit[1])] for x_ in x])
 
-    # preprocess data
-    # 2 steps -> first, perform multiplication, then do the
-    # required transformation
+    # -----------------------------------------------------
+    #
+    # PREPROCESSING OF THE DATA -> multiplication, then
+    # some operation, for instance, taking the logarithm.
+    #
+    # -----------------------------------------------------
+
     x_prep, *_ = _x_val_preprocess(x, 'mult', preprocess_xvals_prefactor)
     x_prep, inv_fun = _x_val_preprocess(x_prep, preprocess_xvals,
                                         1.0)
@@ -284,11 +309,12 @@ def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
     #
     # ---------------------------------------------------------
     np.savez((f'{savepath}/'
-               '/orig_data.npz'), **{'x': x, 'y': y,
-                                     'sizes': sizelist,
-                                     'desc': savename_prefix})
+              '/orig_data.npz'), **{'x': x, 'y': y,
+                                    'sizes': sizelist,
+                                    'desc': savename_prefix})
     np.savez(f'{savepath}/processed_data_{preprocess_xvals}.npz',
              **{'x': tmpdict['x_prep'], 'y': tmpdict['y'],
+                'x_orig': x_, 'y_orig': y_,
                 'x_operation': tmpdict['preprocess_xvals'],
                 'sizes': tmpdict['sizelist'],
                 'desc': tmpdict['savename_prefix']})

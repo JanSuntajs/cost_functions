@@ -106,16 +106,21 @@ _save_keys = ['savename_prefix', 'critical_point_model',
               'rescaling_function', 'preprocess_xvals',
               'save_path']
 
-def save_rescaled_data(xvals, xcrit, yvals, sizelist, costfun, opt_params,
+
+def save_rescaled_data(xvals, xvalsorig, xcrit, yvals, yvalsorig,
+                       sizelist, npoints, costfun, opt_params,
                        savepath, savename):
 
     savefile = {
         'xvals': xvals,
+        'xvals_orig': xvalsorig,
         'xcrit': xcrit,
         'yvals': yvals,
+        'yvalsorig': yvalsorig,
         'sizelist': sizelist,
         'costfun': costfun,
-        'opt_params': opt_params
+        'opt_params': opt_params,
+        'npoints': npoints,
     }
 
     np.savez(f'{savepath}/{savename}_presentation_data.npz', **savefile)
@@ -123,6 +128,7 @@ def save_rescaled_data(xvals, xcrit, yvals, sizelist, costfun, opt_params,
 
 def post_main(costfun_path, savedir,
               savename,
+              npoints,
               special_keys=_special_keys,
               eps=1e-08):
     """
@@ -183,10 +189,11 @@ def post_main(costfun_path, savedir,
     savefile = f'{savedir}/{savename}.txt'
     with open(savefile, 'w') as file:
         file.write(" ".join(map(str, opt_params)))
-        file.write(f'\n{costfun_val} \n')
+        file.write(f'\n{costfun_val} {npoints} \n')
 
         file.write(f'\n# 1st row: optimization parameters.\n')
-        file.write(f'# 2nd row: cost function value.\n')
+        file.write(('# 2nd row: cost function value '
+                    'and the number of points.\n'))
         file.write(f'# Additional procedure details: \n \n')
 
         for key in data_objects[0].files:
@@ -207,6 +214,7 @@ def post_main(costfun_path, savedir,
 
         mean_nfev = int(np.mean(nfev, axis=0))
         std_nfev = int(np.std(nfev, axis=0))
+
         file.write(f'# nfev_mean: {mean_nfev:d}, nfev_std: {std_nfev:d} \n')
 
     savefile_2 = f'{savedir}/{savename}_all_params.txt'
@@ -225,6 +233,7 @@ if __name__ == '__main__':
     # load into a dictionary
     initdict = {key: value for key, value in initfile.items()}
 
+    npoints = int(initdict['npoints'])
     rescale_model = str(initdict['rescaling_function']
                         ).upper().replace('_', ' ')
     crit_model = str(initdict['critical_point_model']
@@ -253,7 +262,7 @@ if __name__ == '__main__':
     if save_double:
         post_main(f'{loadpath}/{loadname_prefix}*',
                   save_processed_path,
-                  savename)
+                  savename, npoints)
     else:
         pass
 
@@ -285,12 +294,20 @@ if __name__ == '__main__':
     # plot the rescaled data
 
     x_data, y_data = pad_vals(proc_data['x'], proc_data['y'])
+    x_data_orig, y_data_orig = pad_vals(proc_data['x_orig'],
+                                        proc_data['y_orig'])
     x_rescaled, x_crit = rescale_xvals(x_data, proc_data['sizes'],
                                        str(initdict['critical_point_model']),
                                        str(initdict['rescaling_function']),
                                        str(initdict['critical_operation']),
                                        *opt_params,
                                        return_crit_vals=True)
+    x_rescaled_, x_crit_ = rescale_xvals(x_data_orig, proc_data['sizes'],
+                                         str(initdict['critical_point_model']),
+                                         str(initdict['rescaling_function']),
+                                         str(initdict['critical_operation']),
+                                         *opt_params,
+                                         return_crit_vals=True)
 
     for i, xval in enumerate(x_rescaled):
 
@@ -313,12 +330,18 @@ if __name__ == '__main__':
             legend = False
         prepare_ax(ax, legend=legend, grid=False, ncol=1)
 
-    save_rescaled_data(x_rescaled, x_crit, y_data, proc_data['sizes'],
+    save_rescaled_data(x_rescaled, x_rescaled_,
+                       x_crit, y_data, y_data_orig,
+                       proc_data['sizes'],
+                       npoints,
                        costfun_val, opt_params, savepath, savename)
     # prepare_plt(f'{savename}.pdf', savepath, top=0.96, show=False)
 
     if save_double:
-        save_rescaled_data(x_rescaled, x_crit, y_data, proc_data['sizes'],
+        save_rescaled_data(x_rescaled, x_rescaled_,
+                           x_crit, y_data, y_data_orig,
+                           proc_data['sizes'],
+                           npoints,
                            costfun_val, opt_params, save_processed_path,
                            savename)
         prepare_plt(f'{savename}.pdf', save_processed_path,
