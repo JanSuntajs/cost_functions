@@ -98,6 +98,38 @@ def _rescale_pl(x, sizelist, nu):
     return rescale_x
 
 
+def _rescale_pl_two_exponents(x, sizelist, nu1, nu2):
+    """
+    Rescaling according to the
+    power-law (pl) scaling.
+
+    Rescaling function:
+
+    x_pl = sgn(x) * size * abs(x) ** nu;
+
+    here, nu can be either nu1 or nu2, depending
+    on whether we are fitting data on the right
+    or left side of the critical point, respectively.
+
+    NOTE: values of x entering the above equation have
+    already been modified by subtracting the value of
+    the critical parameter x_c from them
+    """
+    nu1, nu2 = list(map(np.float64, [nu1, nu2]))
+    sizelist = np.array(sizelist)
+
+    x_left = x[x <= 0]
+    x_right = x[x > 0]
+
+    x_left = np.sign(x_left) * sizelist[:, np.newaxis] * np.abs(x_left) ** nu1
+    x_right = np.sign(x_right) * \
+        sizelist[:, np.newaxis] * np.abs(x_right) ** nu2
+
+    rescale_x = np.append(x_left, x_right)
+
+    return rescale_x
+
+
 def _rescale_pl_irrel(x, sizelist, nu, a0, a1, a2):
     """
     Rescaling according to the power-law scaling which includes
