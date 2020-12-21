@@ -118,14 +118,9 @@ def _rescale_pl_two_exponents(x, sizelist, nu1, nu2):
     nu1, nu2 = list(map(np.float64, [nu1, nu2]))
     sizelist = np.array(sizelist)
 
-    x_left = x[x <= 0]
-    x_right = x[x > 0]
-
-    x_left = np.sign(x_left) * np.abs(x_left) ** nu1
-    x_right = np.sign(x_right) * np.abs(x_right) ** nu2
-
-    rescale_x = np.append(x_left, x_right)
-    rescale_x = rescale_x * sizelist[:, np.newaxis]
+    x_ = np.where(x <= 0, np.sign(x) * np.abs(x)**nu1,
+                  np.sign(x) * np.abs(x) ** nu2)
+    rescale_x = x_ * sizelist[:, np.newaxis]
     return rescale_x
 
 
