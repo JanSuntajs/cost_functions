@@ -98,7 +98,91 @@ def _rescale_pl(x, sizelist, nu):
     return rescale_x
 
 
-def _rescale_pl_two_exponents(x, sizelist, nu1, nu2):
+def _rescale_pl_kt(x, sizelist, nupl, akt):
+    """
+    Rescaling according to the
+    power-law (pl) and bkt scaling
+    left and right from the transition,
+    rescpectively.
+    Rescaling function:
+
+    x_pl = sgn(x) * size * abs(x) ** nupl
+
+    x_kt = sgn(x) * size / exp(akt / abs(x) ** 0.5)
+    NOTE: values of x entering the above equation have
+    already been modified by subtracting the value of
+    the critical parameter x_c from them
+
+    Parameters:
+
+    nupl -> nu in the power law dependence
+    akt -> parameter a in the kt dependence
+    """
+    nupl, akt = list(map(np.float64, [nupl, akt]))
+    sizelist = np.array(sizelist)
+
+    rescale_x = np.where(x <= 0, _rescale_pl(x, sizelist, nupl),
+                         _rescale_kt(x, sizelist, akt))
+
+    return rescale_x
+
+
+def _rescale_kt_pl(x, sizelist, akt, nupl):
+    """
+    Rescaling according to the
+    bkt and power-law (pl) scaling
+    left and right from the transition,
+    rescpectively.
+    Rescaling function:
+
+    x_pl = sgn(x) * size * abs(x) ** nupl
+
+    x_kt = sgn(x) * size / exp(akt / abs(x) ** 0.5)
+    NOTE: values of x entering the above equation have
+    already been modified by subtracting the value of
+    the critical parameter x_c from them
+
+    Parameters:
+
+    nupl -> nu in the power law dependence
+    akt -> parameter a in the kt dependence
+    """
+    nupl, akt = list(map(np.float64, [nupl, akt]))
+    sizelist = np.array(sizelist)
+
+    rescale_x = np.where(x > 0, _rescale_pl(x, sizelist, nupl),
+                         _rescale_kt(x, sizelist, akt))
+
+    return rescale_x
+
+
+def _rescale_kt_kt(x, sizelist, a1, a2):
+    """
+    Rescaling according to the
+    bkt scaling.
+
+    Rescaling function:
+
+    x_KT = sgn(x) * size / exp(a / abs(x) ** 0.5);
+
+    here, nu can be either nu1 or nu2, depending
+    on whether we are fitting data on the right
+    or left side of the critical point, respectively.
+
+    NOTE: values of x entering the above equation have
+    already been modified by subtracting the value of
+    the critical parameter x_c from them
+    """
+    a1, a2 = list(map(np.float64, [a1, a2]))
+    sizelist = np.array(sizelist)
+
+    rescale_x = np.where(x <= 0, _rescale_kt(x, sizelist, a1),
+                         _rescale_kt(x, sizelist, a2))
+
+    return rescale_x
+
+
+def _rescale_pl_pl(x, sizelist, nu1, nu2):
     """
     Rescaling according to the
     power-law (pl) scaling.
@@ -118,9 +202,9 @@ def _rescale_pl_two_exponents(x, sizelist, nu1, nu2):
     nu1, nu2 = list(map(np.float64, [nu1, nu2]))
     sizelist = np.array(sizelist)
 
-    x_ = np.where(x <= 0, np.sign(x) * np.abs(x)**nu1,
-                  np.sign(x) * np.abs(x) ** nu2)
-    rescale_x = x_ * sizelist[:, np.newaxis]
+    rescale_x = np.where(x <= 0, _rescale_pl(x, sizelist, nu1),
+                         _rescale_pl(x, sizelist, nu2))
+
     return rescale_x
 
 
