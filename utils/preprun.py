@@ -173,7 +173,7 @@ def _x_val_preprocess(xvals, preprocess_type='none', prefactor=1.):
         inv_fun = _pow10
     elif preprocess_type == 'inv':
         fun = _inv
-        inv_fun = inv
+        inv_fun = _inv
     elif preprocess_type == 'mult':
         fun = _mult
         inv_fun = _divide
