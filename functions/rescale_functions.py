@@ -228,6 +228,26 @@ def _rescale_pl_irrel(x, sizelist, nu, a0, a1, a2):
     return rescale_x
 
 
+def _rescale_kt_general(x, sizelist, a, nu):
+    """
+    A general shape of the general BKT-like ansatz
+    in which we allow for a general power-law
+    functional ansatz for the critical disorder.
+
+    x_kt_general = sgn(x) * size / exp(a * abs(x) ** nu)
+
+    NOTE: values of x entering the above equation have
+    already been modified by subtracting the value of
+    the critical parameter x_c from them
+
+    """
+    sizelist = np.array(sizelist)
+    rescale_x = np.sign(
+        x) * sizelist[:, np.newaxis] / np.exp(a * np.abs(x) ** nu)
+
+    return rescale_x
+
+
 def _rescale_id(x, sizelist):
     """
     Identity function for rescaling which
