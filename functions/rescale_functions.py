@@ -77,6 +77,30 @@ def _rescale_kt(x, sizelist, a):
     return rescale_x
 
 
+def _rescale_kt_logsize(x, sizelist, a):
+    """
+    Rescaling according to the
+    Kosterlitz-Thouless (KT)
+    scaling law.
+
+    Rescaling function:
+
+    x_KT = sgn(x) * log2(size) / exp(a / abs(x) ** 0.5)
+
+    NOTE: values of x entering the above equation have
+    already been modified by subtracting the value of
+    the critical parameter x_c from them
+
+    Appropriate for studies of the 2D models.
+    """
+
+    sizelist = np.log2(sizelist)
+    rescale_x = np.sign(
+        x) * sizelist[:, np.newaxis] / np.exp(a / np.abs(x) ** 0.5)
+
+    return rescale_x
+
+
 def _rescale_pl(x, sizelist, nu):
     """
     Rescaling according to the
@@ -242,6 +266,27 @@ def _rescale_kt_general(x, sizelist, a, nu):
 
     """
     sizelist = np.array(sizelist)
+    rescale_x = np.sign(
+        x) * sizelist[:, np.newaxis] / np.exp(a * np.abs(x) ** nu)
+
+    return rescale_x
+
+
+def _rescale_kt_general_logsize(x, sizelist, a, nu):
+    """
+    A general shape of the general BKT-like ansatz
+    in which we allow for a general power-law
+    functional ansatz for the critical disorder.
+
+    x_kt_general = sgn(x) * log2(size) / exp(a * abs(x) ** nu)
+
+    NOTE: values of x entering the above equation have
+    already been modified by subtracting the value of
+    the critical parameter x_c from them -> appropriate for
+    KT scaling analysis of the 2D anderson and similar
+
+    """
+    sizelist = np.log2(sizelist)
     rescale_x = np.sign(
         x) * sizelist[:, np.newaxis] / np.exp(a * np.abs(x) ** nu)
 
