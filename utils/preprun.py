@@ -253,9 +253,9 @@ def _preprocessing(data_path, files, sizelist, savepath, xcrit, xcol, ycol,
     # AND LEFTMOST VALUES.
     #
     # ---------------------------------------------------
-    y = np.array([y_[(x[i] > xcrit[0]) & (x[i] < xcrit[1])] for i, y_
+    y = np.array([y_[(x[i] >= xcrit[0]) & (x[i] <= xcrit[1])] for i, y_
                   in enumerate(y)])
-    x = np.array([x_[(x_ > xcrit[0]) & (x_ < xcrit[1])] for x_ in x])
+    x = np.array([x_[(x_ >= xcrit[0]) & (x_ <= xcrit[1])] for x_ in x])
 
     # count the number of points
     numpoints = 0
